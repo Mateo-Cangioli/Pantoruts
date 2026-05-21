@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TORTUS Display</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --accent: #E8622A;
+      --bg: #111110;
+      --surface: #1A1917;
+      --border: #252320;
+      --text: #F0EDE8;
+      --text2: #8A8680;
+      --text3: #444240;
+    }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ── SCREEN WRAPPER ── */
+    .tv-screen {
+      width: 100vw; height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    /* ── TOPBAR ── */
+    .tv-top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 40px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .tv-local-name { font-size: clamp(18px, 2.5vw, 28px); font-weight: 600; letter-spacing: -0.5px; }
+    .tv-local-tag { font-size: clamp(10px, 1.2vw, 13px); color: var(--text2); margin-top: 2px; }
+    .tv-clock { font-size: clamp(22px, 3vw, 32px); font-weight: 300; font-variant-numeric: tabular-nums; }
+    .tv-date { font-size: clamp(10px, 1vw, 12px); color: var(--text2); margin-top: 2px; text-align: right; }
+
+    /* ── CANVAS (grid-based) ── */
+    .tv-canvas {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── BLOCKS ── */
+    .tv-block {
+      position: absolute;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .tv-block-inner { width: 100%; height: 100%; overflow: hidden; padding: 20px 24px; }
+
+    /* MENU BLOCK */
+    .block-section-label {
+      font-size: clamp(8px, 0.8vw, 10px);
+      letter-spacing: 2.5px; text-transform: uppercase; color: var(--text3);
+      margin-bottom: 14px;
+    }
+    .menu-cat {
+      font-size: clamp(9px, 0.9vw, 11px); letter-spacing: 2px; text-transform: uppercase;
+      color: var(--accent); font-weight: 500;
+      margin-bottom: 6px; padding-bottom: 5px;
+      border-bottom: 1px solid var(--border);
+      margin-top: 12px;
+    }
+    .menu-cat:first-child { margin-top: 0; }
+    .menu-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 5px 0; border-bottom: 1px solid var(--border);
+    }
+    .menu-row:last-child { border-bottom: none; }
+    .menu-row-name { font-size: clamp(11px, 1.3vw, 15px); color: #D0CCC6; }
+    .menu-row-price {
+      font-family: 'DM Mono', monospace;
+      font-size: clamp(11px, 1.2vw, 14px); color: var(--accent); font-weight: 500;
+      white-space: nowrap; margin-left: 10px;
+    }
+
+    /* PROMO BLOCK */
+    .promo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: clamp(10px, 1.2vw, 16px);
+      margin-bottom: 10px;
+    }
+    .promo-name { font-size: clamp(13px, 1.5vw, 18px); font-weight: 500; margin-bottom: 4px; }
+    .promo-desc { font-size: clamp(10px, 1vw, 13px); color: var(--text2); }
+    .promo-badge {
+      display: inline-block; margin-top: 8px;
+      background: var(--accent); color: white;
+      font-size: clamp(11px, 1.1vw, 14px); font-weight: 600;
+      padding: 3px 12px; border-radius: 20px;
+    }
+
+    /* IMAGE BLOCK */
+    .img-block { position: relative; width: 100%; height: 100%; }
+    .img-block img { width: 100%; height: 100%; display: block; }
+    .img-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      padding: 20px 18px 12px;
+      font-size: clamp(11px, 1.2vw, 14px); color: white;
+    }
+
+    /* ── FOOTER ── */
+    .tv-foot {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 40px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .tv-foot-note { font-size: clamp(9px, 0.9vw, 11px); color: var(--text3); }
+    .tv-foot-brand { display: flex; align-items: center; gap: 6px; font-size: clamp(9px, 0.9vw, 11px); color: var(--text3); }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+  </style>
+</head>
+<body>
+<script src="src/data.js"></script>
+<script>
+var db = TortusDB.get();
+var COLS = 12, ROWS = 8;
+
+function applyAccent(c) { document.documentElement.style.setProperty('--accent', c); }
+
+function render() {
+  db = TortusDB.get();
+  var c = db.cfg;
+  applyAccent(c.accent || '#E8622A');
+
+  document.body.innerHTML = '';
+
+  var screen = document.createElement('div');
+  screen.className = 'tv-screen';
+
+  // TOPBAR
+  var top = document.createElement('div');
+  top.className = 'tv-top';
+  var now = new Date();
+  var h = now.getHours().toString().padStart(2,'0');
+  var m = now.getMinutes().toString().padStart(2,'0');
+  var days = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  top.innerHTML =
+    '<div><div class="tv-local-name" style="color:'+esc(c.accent)+'">'+esc(c.name||'Mi Local')+'</div>'+
+    '<div class="tv-local-tag">'+esc(c.tagline||'')+'</div></div>'+
+    '<div><div class="tv-clock">'+h+':'+m+'</div>'+
+    '<div class="tv-date">'+days[now.getDay()]+', '+now.getDate()+' de '+months[now.getMonth()]+'</div></div>';
+  screen.appendChild(top);
+
+  // CANVAS
+  var canvas = document.createElement('div');
+  canvas.className = 'tv-canvas';
+  canvas.id = 'tv-canvas';
+  screen.appendChild(canvas);
+
+  // FOOTER
+  var foot = document.createElement('div');
+  foot.className = 'tv-foot';
+  foot.innerHTML =
+    '<span class="tv-foot-note">'+esc(c.footer||'')+'</span>'+
+    '<span class="tv-foot-brand"><div class="live-dot"></div> TORTUS Display</span>';
+  screen.appendChild(foot);
+
+  document.body.appendChild(screen);
+
+  // Render blocks after layout
+  requestAnimationFrame(function(){
+    var cvs = document.getElementById('tv-canvas');
+    var W = cvs.offsetWidth;
+    var H = cvs.offsetHeight;
+
+    db.blocks.forEach(function(block){
+      var el = document.createElement('div');
+      el.className = 'tv-block';
+      el.style.left   = (block.x / COLS * W) + 'px';
+      el.style.top    = (block.y / ROWS * H) + 'px';
+      el.style.width  = (block.w / COLS * W) + 'px';
+      el.style.height = (block.h / ROWS * H) + 'px';
+
+      if (block.type === 'image') {
+        if (block.data.url) {
+          var wrap = document.createElement('div');
+          wrap.className = 'img-block';
+          var img = document.createElement('img');
+          img.src = block.data.url;
+          img.style.objectFit = block.data.fit || 'cover';
+          wrap.appendChild(img);
+          if (block.data.caption) {
+            var cap = document.createElement('div');
+            cap.className = 'img-caption';
+            cap.textContent = block.data.caption;
+            wrap.appendChild(cap);
+          }
+          el.appendChild(wrap);
+        } else {
+          el.style.background = '#1a1a1a';
+          el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#333;font-size:13px;">Sin imagen</div>';
+        }
+      } else {
+        var inner = document.createElement('div');
+        inner.className = 'tv-block-inner';
+
+        if (block.type === 'menu') {
+          var cats = {};
+          (block.data.items||[]).forEach(function(item){
+            if (!cats[item.cat]) cats[item.cat]=[];
+            cats[item.cat].push(item);
+          });
+          var html = '<div class="block-section-label">Menú</div>';
+          Object.keys(cats).forEach(function(cat){
+            html += '<div class="menu-cat">'+esc(cat)+'</div>';
+            cats[cat].forEach(function(item){
+              html += '<div class="menu-row">';
+              html += '<span class="menu-row-name">'+esc(item.name)+'</span>';
+              html += '<span class="menu-row-price">'+esc(c.currency||'$')+'\u00a0'+item.price.toLocaleString('es-AR')+'</span>';
+              html += '</div>';
+            });
+          });
+          if (!Object.keys(cats).length) html += '<p style="color:#333;font-size:13px;">Sin ítems</p>';
+          inner.innerHTML = html;
+        }
+
+        if (block.type === 'promo') {
+          var html2 = '<div class="block-section-label">Promociones</div>';
+          (block.data.promos||[]).forEach(function(p){
+            html2 += '<div class="promo-card">';
+            html2 += '<div class="promo-name">'+esc(p.title)+'</div>';
+            html2 += '<div class="promo-desc">'+esc(p.desc)+'</div>';
+            if (p.badge) html2 += '<span class="promo-badge">'+esc(p.badge)+'</span>';
+            html2 += '</div>';
+          });
+          if (!(block.data.promos||[]).length) html2 += '<p style="color:#333;font-size:13px;">Sin promos</p>';
+          inner.innerHTML = html2;
+        }
+
+        el.appendChild(inner);
+      }
+
+      cvs.appendChild(el);
+    });
+  });
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+render();
+setInterval(render, 30000); // auto-refresh cada 30s
+</script>
+</body>
+</html>
